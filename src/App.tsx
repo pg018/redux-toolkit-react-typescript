@@ -1,24 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import { useAppDispatch, useTypedSelector } from './stateStore';
+import DecrementButton from './components/DecrementButton';
+import IncrementButton from './components/IncrementButton';
+import ResetButton from './components/ResetButton';
+import { IncDecServices } from './reducers/IncDecSlice';
 
 function App() {
+  const dispatch = useAppDispatch()
+  const currentNumber = useTypedSelector((state) => state.IncDec.currentNumber) //getting data from store
+  const apiNumber = useTypedSelector((state) => state.IncDec.apiNumber)
+  const [userNumber, setUserNumber] = useState<number>()
+
+  const userNumberHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserNumber(+e.target.value)
+  }
+
+  useEffect(() => {
+    if (apiNumber !== null) {
+      setUserNumber(apiNumber)
+    } else {
+      setUserNumber(undefined)
+    }
+  },[apiNumber])
+
+  const randomNumberGeneratorButton = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    dispatch(IncDecServices.getRandomNumber())
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h2>{currentNumber}</h2>
+      <div className='buttons'>
+        <div className='button-div'>
+          <IncrementButton value={userNumber} />
+          <DecrementButton value={userNumber}/>
+        </div>
+        <ResetButton />
+      </div>
+      <input 
+        type="number"
+        style={{marginBottom: '2rem'}}
+        value={userNumber ? userNumber : undefined} 
+        onChange={userNumberHandler} 
+      />
+      <button onClick={randomNumberGeneratorButton}>Get Random Number From API</button>
     </div>
   );
 }
